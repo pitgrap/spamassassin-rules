@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpamAssassin Custom Rules Channel</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+    pre  { background: #f4f4f4; padding: 1em; border-radius: 5px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>SpamAssassin Custom Rules Channel</h1>
+  <p>Current version: <strong>${VERSION}</strong> &mdash; Published: <time datetime="${DATE}">${DATE}</time></p>
+  <h2>Subscribe via sa-update</h2>
+  <pre><code>curl -o /etc/mail/spamassassin/pitgrap.key https://pitgrap.github.io/spamassassin-rules/GPG.KEY
+sa-update --channel pitgrap.github.io/spamassassin-rules --gpgkeyfile /etc/mail/spamassassin/pitgrap.key</code></pre>
+  <p>Or add to <code>/etc/spamassassin/channel.d/pitgrap.conf</code>:</p>
+  <pre><code>channel pitgrap.github.io/spamassassin-rules</code></pre>
+  <h2>GPG Verification</h2>
+  <p>The rules archive is signed with GPG. To verify manually:</p>
+  <pre><code>gpg --import GPG.KEY
+gpg --verify ${VERSION}.tar.gz.asc ${VERSION}.tar.gz</code></pre>
+  <h2>Files</h2>
+  <ul>
+    <li><a href="${VERSION}.tar.gz">${VERSION}.tar.gz</a></li>
+    <li><a href="${VERSION}.tar.gz.sha256">${VERSION}.tar.gz.sha256</a></li>
+    <li><a href="${VERSION}.tar.gz.sha512">${VERSION}.tar.gz.sha512</a></li>
+    <li><a href="${VERSION}.tar.gz.asc">${VERSION}.tar.gz.asc</a></li>
+    <li><a href="GPG.KEY">GPG.KEY</a></li>
+    <li><a href="VERSION">VERSION</a></li>
+  </ul>
+  <h2>Source</h2>
+  <p><a href="https://github.com/pitgrap/spamassassin-rules">github.com/pitgrap/spamassassin-rules</a></p>
+</body>
+</html>
