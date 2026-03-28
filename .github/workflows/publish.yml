@@ -1,0 +1,111 @@
+name: Publish SpamAssassin Channel
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'rules/**'
+      - '.github/workflows/publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
+
+jobs:
+  lint-and-publish:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Install SpamAssassin
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y spamassassin
+
+      - name: Lint SpamAssassin rules
+        run: |
+          spamassassin --lint -C rules/ 2>&1
+          echo "Lint passed successfully."
+
+      - name: Determine channel version
+        id: version
+        run: |
+          VERSION=$(git rev-list --count HEAD)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "Channel version: ${VERSION}"
+
+      - name: Create rules archive
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          tar -czf "${VERSION}.tar.gz" -C rules .
+          echo "Created ${VERSION}.tar.gz"
+
+      - name: Generate SHA256 checksum
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          sha256sum "${VERSION}.tar.gz" > "${VERSION}.tar.gz.sha256"
+          echo "SHA256: $(cat "${VERSION}.tar.gz.sha256")"
+
+      - name: Create VERSION file
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          echo "${VERSION}" > VERSION
+          echo "VERSION file contains: ${VERSION}"
+
+      - name: Prepare GitHub Pages output
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          mkdir -p gh-pages
+          cp "${VERSION}.tar.gz"        gh-pages/
+          cp "${VERSION}.tar.gz.sha256" gh-pages/
+          cp VERSION                    gh-pages/
+          # Create a simple index page
+          cat > gh-pages/index.html <<EOF
+          <!DOCTYPE html>
+          <html lang="en">
+          <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>SpamAssassin Custom Rules Channel</title>
+            <style>
+              body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+              code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+              pre  { background: #f4f4f4; padding: 1em; border-radius: 5px; overflow-x: auto; }
+            </style>
+          </head>
+          <body>
+            <h1>SpamAssassin Custom Rules Channel</h1>
+            <p>Current version: <strong>${VERSION}</strong></p>
+            <h2>Subscribe via sa-update</h2>
+            <pre><code>sa-update --channel pitgrap.github.io/spamassassin-rules --no-gpg</code></pre>
+            <p>Or add to <code>/etc/spamassassin/channel.d/pitgrap.conf</code>:</p>
+            <pre><code>channel pitgrap.github.io/spamassassin-rules</code></pre>
+            <h2>Files</h2>
+            <ul>
+              <li><a href="${VERSION}.tar.gz">${VERSION}.tar.gz</a></li>
+              <li><a href="${VERSION}.tar.gz.sha256">${VERSION}.tar.gz.sha256</a></li>
+              <li><a href="VERSION">VERSION</a></li>
+            </ul>
+            <h2>Source</h2>
+            <p><a href="https://github.com/pitgrap/spamassassin-rules">github.com/pitgrap/spamassassin-rules</a></p>
+          </body>
+          </html>
+          EOF
+          echo "GitHub Pages output prepared."
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./gh-pages
+          publish_branch: gh-pages
+          force_orphan: false
+          keep_files: true
+          commit_message: "chore: publish rules v${{ steps.version.outputs.version }}"
