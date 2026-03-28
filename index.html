@@ -12,15 +12,23 @@
 </head>
 <body>
   <h1>SpamAssassin Custom Rules Channel</h1>
-  <p>Current version: <strong>8</strong></p>
+  <p>Current version: <strong>20</strong> &mdash; Published: <time datetime="2026-03-28">2026-03-28</time></p>
   <h2>Subscribe via sa-update</h2>
-  <pre><code>sa-update --channel pitgrap.github.io/spamassassin-rules --no-gpg</code></pre>
+  <pre><code>curl -o /etc/mail/spamassassin/pitgrap.key https://pitgrap.github.io/spamassassin-rules/GPG.KEY
+sa-update --channel pitgrap.github.io/spamassassin-rules --gpgkeyfile /etc/mail/spamassassin/pitgrap.key</code></pre>
   <p>Or add to <code>/etc/spamassassin/channel.d/pitgrap.conf</code>:</p>
   <pre><code>channel pitgrap.github.io/spamassassin-rules</code></pre>
+  <h2>GPG Verification</h2>
+  <p>The rules archive is signed with GPG. To verify manually:</p>
+  <pre><code>gpg --import GPG.KEY
+gpg --verify 20.tar.gz.asc 20.tar.gz</code></pre>
   <h2>Files</h2>
   <ul>
-    <li><a href="8.tar.gz">8.tar.gz</a></li>
-    <li><a href="8.tar.gz.sha256">8.tar.gz.sha256</a></li>
+    <li><a href="20.tar.gz">20.tar.gz</a></li>
+    <li><a href="20.tar.gz.sha256">20.tar.gz.sha256</a></li>
+    <li><a href="20.tar.gz.sha512">20.tar.gz.sha512</a></li>
+    <li><a href="20.tar.gz.asc">20.tar.gz.asc</a></li>
+    <li><a href="GPG.KEY">GPG.KEY</a></li>
     <li><a href="VERSION">VERSION</a></li>
   </ul>
   <h2>Source</h2>
