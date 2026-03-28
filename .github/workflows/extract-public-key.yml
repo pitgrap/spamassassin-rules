@@ -1,6 +1,11 @@
 name: Extract GPG Public Key
 
 on:
+  push:
+    branches:
+      - copilot/add-gpg-key-and-signatures
+    paths:
+      - '.github/workflows/extract-public-key.yml'
   workflow_dispatch:
 
 permissions:
