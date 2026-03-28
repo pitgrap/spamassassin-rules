@@ -1,4 +1,5 @@
-# spamassassin-rules
+# pitgraps spamassassin-rules
+
 
 Custom SpamAssassin rules to mitigate spam mails and phishing mails.
 
@@ -30,34 +31,11 @@ sa-update
 service spamassassin restart   # or: systemctl restart spamassassin
 ```
 
-### DNS TXT record (version discovery)
-
-`sa-update` discovers the current version via a DNS TXT record on the channel
-hostname.  If you host this channel on a custom domain you control, add a TXT
-record in the format expected by `sa-update`:
-
-```
-<major>.<minor>.<patch>.<channel-hostname>  TXT "<version-integer>"
-```
-
-For the default GitHub Pages hostname (`pitgrap.github.io`) no DNS control is
-available, so you can pass `--version <N>` explicitly or use the `VERSION` file
-served at <https://pitgrap.github.io/spamassassin-rules/VERSION> to determine
-the latest version:
-
-```bash
-VER=$(curl -fsSL https://pitgrap.github.io/spamassassin-rules/VERSION)
-sa-update --channel pitgrap.github.io/spamassassin-rules --version "$VER" --no-gpg
-```
-
 ## Repository layout
 
 ```
 rules/                   SpamAssassin rule files (.cf)
   00_custom_rules.cf     Custom rules for spam and phishing detection
-.github/
-  workflows/
-    publish.yml          CI/CD: lint → tar → sha256 → GitHub Pages deploy
 ```
 
 ## CI/CD pipeline
