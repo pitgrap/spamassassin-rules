@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'rules/**'
+      - 'GPG.KEY'
       - '.github/workflows/publish.yml'
   workflow_dispatch:
 
@@ -53,6 +54,23 @@ jobs:
           sha256sum "${VERSION}.tar.gz" > "${VERSION}.tar.gz.sha256"
           echo "SHA256: $(cat "${VERSION}.tar.gz.sha256")"
 
+      - name: Generate SHA512 checksum
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          sha512sum "${VERSION}.tar.gz" > "${VERSION}.tar.gz.sha512"
+          echo "SHA512: $(cat "${VERSION}.tar.gz.sha512")"
+
+      - name: Import GPG key and sign archive
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+        run: |
+          VERSION=${{ steps.version.outputs.version }}
+          echo "${GPG_PRIVATE_KEY}" | base64 --decode > /tmp/private.key
+          gpg --batch --import /tmp/private.key || { echo "ERROR: GPG key import failed"; exit 1; }
+          rm -f /tmp/private.key
+          gpg --batch --yes --armor --detach-sign "${VERSION}.tar.gz"
+          echo "Signed ${VERSION}.tar.gz -> ${VERSION}.tar.gz.asc"
+
       - name: Create VERSION file
         run: |
           VERSION=${{ steps.version.outputs.version }}
@@ -65,7 +83,10 @@ jobs:
           mkdir -p gh-pages
           cp "${VERSION}.tar.gz"        gh-pages/
           cp "${VERSION}.tar.gz.sha256" gh-pages/
+          cp "${VERSION}.tar.gz.sha512" gh-pages/
+          cp "${VERSION}.tar.gz.asc"    gh-pages/
           cp VERSION                    gh-pages/
+          cp GPG.KEY                    gh-pages/
           # Create a simple index page
           cat > gh-pages/index.html <<EOF
           <!DOCTYPE html>
@@ -84,13 +105,21 @@ jobs:
             <h1>SpamAssassin Custom Rules Channel</h1>
             <p>Current version: <strong>${VERSION}</strong></p>
             <h2>Subscribe via sa-update</h2>
-            <pre><code>sa-update --channel pitgrap.github.io/spamassassin-rules --no-gpg</code></pre>
+            <pre><code>curl -o /etc/mail/spamassassin/pitgrap.key https://pitgrap.github.io/spamassassin-rules/GPG.KEY
+sa-update --channel pitgrap.github.io/spamassassin-rules --gpgkeyfile /etc/mail/spamassassin/pitgrap.key</code></pre>
             <p>Or add to <code>/etc/spamassassin/channel.d/pitgrap.conf</code>:</p>
             <pre><code>channel pitgrap.github.io/spamassassin-rules</code></pre>
+            <h2>GPG Verification</h2>
+            <p>The rules archive is signed with GPG. To verify manually:</p>
+            <pre><code>gpg --import GPG.KEY
+          gpg --verify ${VERSION}.tar.gz.asc ${VERSION}.tar.gz</code></pre>
             <h2>Files</h2>
             <ul>
               <li><a href="${VERSION}.tar.gz">${VERSION}.tar.gz</a></li>
               <li><a href="${VERSION}.tar.gz.sha256">${VERSION}.tar.gz.sha256</a></li>
+              <li><a href="${VERSION}.tar.gz.sha512">${VERSION}.tar.gz.sha512</a></li>
+              <li><a href="${VERSION}.tar.gz.asc">${VERSION}.tar.gz.asc</a></li>
+              <li><a href="GPG.KEY">GPG.KEY</a></li>
               <li><a href="VERSION">VERSION</a></li>
             </ul>
             <h2>Source</h2>
