@@ -23,6 +23,4 @@ jobs:
           sudo apt-get install -y spamassassin
 
       - name: Lint SpamAssassin rules
-        run: |
-          spamassassin --lint -C rules/ 2>&1
-          echo "Lint passed successfully."
+        run: spamassassin --lint -C rules/
