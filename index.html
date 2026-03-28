@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SpamAssassin Custom Rules Channel</title>
+  <style>
+    body { font-family: sans-serif; max-width: 800px; margin: 2rem auto; padding: 0 1rem; }
+    code { background: #f4f4f4; padding: 0.2em 0.4em; border-radius: 3px; }
+    pre  { background: #f4f4f4; padding: 1em; border-radius: 5px; overflow-x: auto; }
+  </style>
+</head>
+<body>
+  <h1>SpamAssassin Custom Rules Channel</h1>
+  <p>Current version: <strong>6</strong></p>
+  <h2>Subscribe via sa-update</h2>
+  <pre><code>sa-update --channel pitgrap.github.io/spamassassin-rules --no-gpg</code></pre>
+  <p>Or add to <code>/etc/spamassassin/channel.d/pitgrap.conf</code>:</p>
+  <pre><code>channel pitgrap.github.io/spamassassin-rules</code></pre>
+  <h2>Files</h2>
+  <ul>
+    <li><a href="6.tar.gz">6.tar.gz</a></li>
+    <li><a href="6.tar.gz.sha256">6.tar.gz.sha256</a></li>
+    <li><a href="VERSION">VERSION</a></li>
+  </ul>
+  <h2>Source</h2>
+  <p><a href="https://github.com/pitgrap/spamassassin-rules">github.com/pitgrap/spamassassin-rules</a></p>
+</body>
+</html>
