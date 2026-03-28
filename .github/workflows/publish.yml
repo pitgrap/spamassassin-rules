@@ -100,3 +100,22 @@ jobs:
           force_orphan: false
           keep_files: true
           commit_message: "chore: publish rules v${{ steps.version.outputs.version }}"
+
+      - name: Verify channel update via sa-update
+        run: |
+          echo "Waiting for GitHub Pages to propagate..."
+          sleep 30
+          curl --retry 5 --retry-delay 15 --retry-all-errors -fsSL \
+            https://pitgrap.github.io/spamassassin-rules/GPG.KEY \
+            -o /tmp/pitgrap.key
+          sudo sa-update \
+            --channel pitgrap.github.io/spamassassin-rules \
+            --gpgkeyfile /tmp/pitgrap.key \
+            --verbose
+          RC=$?
+          if [ "${RC}" -eq 0 ] || [ "${RC}" -eq 1 ]; then
+            echo "Channel check passed (rc=${RC})."
+          else
+            echo "Channel check FAILED (rc=${RC})." >&2
+            exit "${RC}"
+          fi
