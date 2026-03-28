@@ -1,0 +1,28 @@
+name: Check SpamAssassin Rules
+
+on:
+  pull_request:
+    paths:
+      - 'rules/**'
+      - '.github/workflows/check-rules.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install SpamAssassin
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y spamassassin
+
+      - name: Lint SpamAssassin rules
+        run: |
+          spamassassin --lint -C rules/ 2>&1
+          echo "Lint passed successfully."
