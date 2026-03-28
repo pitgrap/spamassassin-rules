@@ -3,25 +3,21 @@
 #
 # Rules targeting spam and phishing mails.
 # Naming conventions:
-#   RIT_*      - individual header/body/uri/full rules
-#   RIT_SPAM_* - meta rules combining multiple signals
+#   __RIT_*      - internal header/body/uri/full rules (no describe/score)
+#   RIT_SPAM_*   - public meta rules (with describe and score)
 
 # ---------------------------------------------------------------------------
-# Example rule
+# Internal rules (building blocks)
 # ---------------------------------------------------------------------------
 
-header   RIT_PHISH_VERIFY_ACCOUNT  Subject =~ /\b(verify|confirm|validate)\s+(your\s+)?(account|identity|email|password)\b/i
-describe RIT_PHISH_VERIFY_ACCOUNT  Subject asks to verify/confirm account or identity
-score    RIT_PHISH_VERIFY_ACCOUNT  2.5
+header   __RIT_PHISH_VERIFY_ACCOUNT  Subject =~ /\b(verify|confirm|validate)\s+(your\s+)?(account|identity|email|password)\b/i
+
+body     __RIT_PHISH_CLICK_HERE      /\bclick\s+here\s+to\s+(verify|confirm|update|activate|reactivate|restore)\b/i
 
 # ---------------------------------------------------------------------------
-# Example meta rule
+# Meta rules
 # ---------------------------------------------------------------------------
 
-body     RIT_PHISH_CLICK_HERE      /\bclick\s+here\s+to\s+(verify|confirm|update|activate|reactivate|restore)\b/i
-describe RIT_PHISH_CLICK_HERE      Body contains "click here to verify/confirm/update" phishing language
-score    RIT_PHISH_CLICK_HERE      2.0
-
-meta     RIT_SPAM_PHISH_COMBINED   RIT_PHISH_VERIFY_ACCOUNT && RIT_PHISH_CLICK_HERE
+meta     RIT_SPAM_PHISH_COMBINED   __RIT_PHISH_VERIFY_ACCOUNT && __RIT_PHISH_CLICK_HERE
 describe RIT_SPAM_PHISH_COMBINED   Subject asks for account verification and body contains phishing link
 score    RIT_SPAM_PHISH_COMBINED   3.0
