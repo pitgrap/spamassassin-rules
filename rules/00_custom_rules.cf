@@ -2,87 +2,26 @@
 # Channel: pitgrap.github.io/spamassassin-rules
 #
 # Rules targeting spam and phishing mails.
+# Naming conventions:
+#   RIT_*      - individual header/body/uri/full rules
+#   RIT_SPAM_* - meta rules combining multiple signals
 
 # ---------------------------------------------------------------------------
-# Phishing / credential harvesting
+# Example rule
 # ---------------------------------------------------------------------------
 
-header   PHISH_VERIFY_ACCOUNT    Subject =~ /\b(verify|confirm|validate)\s+(your\s+)?(account|identity|email|password)\b/i
-describe PHISH_VERIFY_ACCOUNT    Subject asks to verify/confirm account or identity
-score    PHISH_VERIFY_ACCOUNT    2.5
-
-header   PHISH_ACCOUNT_SUSPENDED Subject =~ /\b(account|access)\s+(has\s+been\s+)?(suspended|deactivated|locked|disabled|blocked)\b/i
-describe PHISH_ACCOUNT_SUSPENDED Subject claims account has been suspended
-score    PHISH_ACCOUNT_SUSPENDED  2.5
-
-header   PHISH_UNUSUAL_SIGNIN    Subject =~ /\b(unusual|suspicious|unrecognized)\s+(sign.?in|login|activity|access)\b/i
-describe PHISH_UNUSUAL_SIGNIN    Subject mentions unusual sign-in or suspicious activity
-score    PHISH_UNUSUAL_SIGNIN    2.5
-
-body     PHISH_CLICK_HERE_LINK   /\bclick\s+here\s+to\s+(verify|confirm|update|activate|reactivate|restore)\b/i
-describe PHISH_CLICK_HERE_LINK   Body contains "click here to verify/confirm/update" phishing language
-score    PHISH_CLICK_HERE_LINK   2.0
-
-body     PHISH_CREDENTIALS_EXPIRE /\b(your\s+)?(password|credentials?|account)\s+(will\s+)?(expire[sd]?|expiring)\b/i
-describe PHISH_CREDENTIALS_EXPIRE Body claims password/credentials are expiring
-score    PHISH_CREDENTIALS_EXPIRE 2.0
+header   RIT_PHISH_VERIFY_ACCOUNT  Subject =~ /\b(verify|confirm|validate)\s+(your\s+)?(account|identity|email|password)\b/i
+describe RIT_PHISH_VERIFY_ACCOUNT  Subject asks to verify/confirm account or identity
+score    RIT_PHISH_VERIFY_ACCOUNT  2.5
 
 # ---------------------------------------------------------------------------
-# Lottery / prize / advance-fee fraud
+# Example meta rule
 # ---------------------------------------------------------------------------
 
-header   SPAM_LOTTERY_WINNER     Subject =~ /\b(you\s+(have\s+)?(won|are\s+a\s+winner)|lottery\s+winner|prize\s+winner)\b/i
-describe SPAM_LOTTERY_WINNER     Subject claims recipient won a lottery or prize
-score    SPAM_LOTTERY_WINNER     3.5
+body     RIT_PHISH_CLICK_HERE      /\bclick\s+here\s+to\s+(verify|confirm|update|activate|reactivate|restore)\b/i
+describe RIT_PHISH_CLICK_HERE      Body contains "click here to verify/confirm/update" phishing language
+score    RIT_PHISH_CLICK_HERE      2.0
 
-header   SPAM_MILLION_DOLLARS    Subject =~ /\b\d[\d,.]*\s*(million|billion)\s*(dollars?|USD|€|euros?|pounds?|GBP)\b/i
-describe SPAM_MILLION_DOLLARS    Subject contains large monetary amount (advance-fee fraud)
-score    SPAM_MILLION_DOLLARS    3.0
-
-body     SPAM_NIGERIAN_PRINCE    /\b(nigerian?\s+prince|inheritance\s+fund|next\s+of\s+kin|deceased\s+client)\b/i
-describe SPAM_NIGERIAN_PRINCE    Body contains advance-fee fraud language
-score    SPAM_NIGERIAN_PRINCE    4.0
-
-body     SPAM_URGENT_TRANSFER    /\b(urgent|confidential)\s+(fund|money|transfer|transaction|business\s+proposal)\b/i
-describe SPAM_URGENT_TRANSFER    Body contains urgent fund/money transfer language
-score    SPAM_URGENT_TRANSFER    2.5
-
-# ---------------------------------------------------------------------------
-# Pharmaceutical / counterfeit goods spam
-# ---------------------------------------------------------------------------
-
-header   SPAM_CHEAP_MEDS         Subject =~ /\b(cheap|discount|order\s+online)\s+(viagra|cialis|levitra|pharmacy|meds?|pills?)\b/i
-describe SPAM_CHEAP_MEDS         Subject advertises cheap medications
-score    SPAM_CHEAP_MEDS         4.0
-
-body     SPAM_ONLINE_PHARMACY    /\b(online\s+pharmacy|no\s+prescription\s+(needed|required)|buy\s+(online\s+)?without\s+prescription)\b/i
-describe SPAM_ONLINE_PHARMACY    Body advertises online pharmacy or no-prescription drugs
-score    SPAM_ONLINE_PHARMACY    3.5
-
-# ---------------------------------------------------------------------------
-# Free money / investment fraud
-# ---------------------------------------------------------------------------
-
-header   SPAM_FREE_MONEY         Subject =~ /\b(free\s+money|make\s+money\s+fast|earn\s+\$|unlimited\s+income)\b/i
-describe SPAM_FREE_MONEY         Subject promises free money or fast earnings
-score    SPAM_FREE_MONEY         3.5
-
-header   SPAM_GET_RICH            Subject =~ /\b(get\s+rich|work\s+from\s+home\s+and\s+earn|financial\s+freedom\s+guaranteed)\b/i
-describe SPAM_GET_RICH            Subject promises to get rich or guaranteed financial freedom
-score    SPAM_GET_RICH            3.0
-
-body     SPAM_INVESTMENT_RETURNS /\b(guaranteed?\s+(returns?|profits?|earnings?)|risk[\s-]?free\s+investment)\b/i
-describe SPAM_INVESTMENT_RETURNS Body promises guaranteed investment returns
-score    SPAM_INVESTMENT_RETURNS 2.5
-
-# ---------------------------------------------------------------------------
-# Meta rules combining above signals
-# ---------------------------------------------------------------------------
-
-meta     PHISH_COMBINED          (PHISH_VERIFY_ACCOUNT || PHISH_ACCOUNT_SUSPENDED || PHISH_UNUSUAL_SIGNIN) && (PHISH_CLICK_HERE_LINK || PHISH_CREDENTIALS_EXPIRE)
-describe PHISH_COMBINED          Multiple phishing signals detected
-score    PHISH_COMBINED          3.0
-
-meta     SPAM_FRAUD_COMBINED     (SPAM_LOTTERY_WINNER || SPAM_MILLION_DOLLARS || SPAM_NIGERIAN_PRINCE) && SPAM_URGENT_TRANSFER
-describe SPAM_FRAUD_COMBINED     Multiple advance-fee fraud signals detected
-score    SPAM_FRAUD_COMBINED     3.0
+meta     RIT_SPAM_PHISH_COMBINED   RIT_PHISH_VERIFY_ACCOUNT && RIT_PHISH_CLICK_HERE
+describe RIT_SPAM_PHISH_COMBINED   Subject asks for account verification and body contains phishing link
+score    RIT_SPAM_PHISH_COMBINED   3.0
